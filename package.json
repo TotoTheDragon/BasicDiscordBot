@@ -1,0 +1,31 @@
+{
+  "name": "basicdiscordbot",
+  "version": "1.0.0",
+  "description": "A boilerplate for typescript discord bots",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TotoTheDragon/BasicDiscordBot.git"
+  },
+  "keywords": [
+    "typescript",
+    "ts",
+    "discord",
+    "bot"
+  ],
+  "author": "DeveloperDragon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TotoTheDragon/BasicDiscordBot/issues"
+  },
+  "homepage": "https://github.com/TotoTheDragon/BasicDiscordBot#readme",
+  "dependencies": {
+    "@types/mongoose": "^5.7.36",
+    "@types/node": "^14.6.0",
+    "discord.js": "^12.3.1",
+    "mongoose": "^5.10.0"
+  }
+}
