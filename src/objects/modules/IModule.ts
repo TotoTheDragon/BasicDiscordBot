@@ -42,8 +42,9 @@ export abstract class IModule {
     commands: number = 0;
     events: number = 0;
 
-    getGuildSettings(): Map<string, any> {
-        return (this.configuration !== undefined && this.configuration.guildSettings !== undefined) ? this.configuration.guildSettings.mapKeys((value, key) => `${this.identifier}_${key}`) : new Map();
+    getGuildSettings(prefixed: boolean = true): Map<string, any> {
+        if (prefixed) return (this.configuration !== undefined && this.configuration.guildSettings !== undefined) ? this.configuration.guildSettings.mapKeys((value, key) => `${this.identifier}_${key}`) : new Map();
+        return (this.configuration !== undefined && this.configuration.guildSettings !== undefined) ? this.configuration.guildSettings : new Map();
     }
 
     getGlobalSettings(prefixed: boolean = false): Map<string, any> {
