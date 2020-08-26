@@ -14,13 +14,7 @@ export class CommandHandler implements Event {
         if (message.author.bot) return;
 
         let wrappedMessage: WrappedMessage = message as WrappedMessage;
-        let guildSettings: Settings = (await client.getSettings(message.guild?.id)).settings; // Get settings for the guild
-        console.log(guildSettings);
-
-        /* Values for testing stuff */
-
-        // guildSettings.roleLevels.set("747576551020822579", 100);
-        // guildSettings.roleLevels.set("554319597264830474", 100);
+        let guildSettings: Settings = await client.getGuildSettings(message.guild?.id); // Get settings for the guild
 
         wrappedMessage.settings = guildSettings;
         const cmdInfo: CommandInfo = new CommandInfo(wrappedMessage);
@@ -30,8 +24,6 @@ export class CommandHandler implements Event {
 
         const args: string[] = message.content.slice(sliceLength).trim().split(" ");
         const command: string = args.shift();
-        console.log(args);
-        console.log(command);
         if (client.commands.has(command) || client.aliases.has(command)) { // Check if command exists
             let cmd = (client.commands.get(command) || client.aliases.get(command)); // Get command
 
