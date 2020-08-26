@@ -1,7 +1,7 @@
 import { CommandArgument } from "../CommandArgument";
 import { parseTimeToSeconds } from "../../../util/TimeUtil";
 
-export class TimeArgument implements CommandArgument {
+export class TimeArgument implements CommandArgument<number> {
 
     name: string;
     identifier: string;

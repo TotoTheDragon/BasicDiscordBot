@@ -1,4 +1,4 @@
-export interface CommandArgument {
+export interface CommandArgument<T> {
 
     name: string;
 
@@ -6,11 +6,14 @@ export interface CommandArgument {
 
     description: string;
 
+    default?: T;
+
     required: boolean;
 
-    setName: (paramString: string) => CommandArgument;
-    setDescription: (paramString: string) => CommandArgument;
-    setRequired: (paramBoolean: boolean) => CommandArgument;
+    setName: (paramString: string) => CommandArgument<T>;
+    setDefault?: (paramValue: T) => CommandArgument<T>;
+    setDescription: (paramString: string) => CommandArgument<T>;
+    setRequired: (paramBoolean: boolean) => CommandArgument<T>;
 
     parse: (paramString: string) => any;
 

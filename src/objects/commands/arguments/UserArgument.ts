@@ -2,7 +2,7 @@ import { CommandArgument } from "../CommandArgument";
 import { WrappedClient } from "../../../client";
 import { User } from "discord.js";
 
-export class UserArgument implements CommandArgument {
+export class UserArgument implements CommandArgument<User> {
 
     name: string;
     identifier: string;

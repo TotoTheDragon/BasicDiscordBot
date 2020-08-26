@@ -1,12 +1,13 @@
 import { CommandArgument } from "../CommandArgument";
 
-export class StringArgument implements CommandArgument {
+export class StringArgument implements CommandArgument<string> {
 
     name: string;
     identifier: string;
     description: string;
     required: boolean;
     limit: number;
+    default: string;
 
     constructor() {
         this.name = "A string";
@@ -14,6 +15,11 @@ export class StringArgument implements CommandArgument {
         this.description = "A string";
         this.required = true;
         this.limit = 1;
+    }
+
+    setDefault = (paramString: string): StringArgument => {
+        this.default = paramString;
+        return this;
     }
 
     setName = (paramString: string): StringArgument => {

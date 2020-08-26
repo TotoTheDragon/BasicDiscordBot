@@ -1,6 +1,6 @@
 import { CommandArgument } from "../CommandArgument";
 
-export class IntegerArgument implements CommandArgument {
+export class IntegerArgument implements CommandArgument<number> {
 
     name: string;
     identifier: string;

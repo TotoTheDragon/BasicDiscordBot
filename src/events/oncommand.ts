@@ -27,7 +27,7 @@ export class CommandHandler implements Event {
         if (client.commands.has(command) || client.aliases.has(command)) { // Check if command exists
             let cmd = (client.commands.get(command) || client.aliases.get(command)); // Get command
 
-            if (cmdInfo.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and check if that is allowed
+            if (cmdInfo.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and if that is allowed
 
             /*
             if ((guildSettings.cmdLevels.get(cmd.label) ? guildSettings.cmdLevels.get(cmd.label) : cmd.defaultLevel) > getUserLevel(cmdInfo)) {
@@ -47,9 +47,9 @@ export class CommandHandler implements Event {
                 for (let i = 0; i < cmd.arguments.length; i++) {
                     const current = cmd.arguments[i];
                     const val = current.parse(str.trimStart());
-                    argmap.set(current.identifier, val);
+                    argmap.set(current.identifier, val || current.default);
                     if (val) str = current.slice(str.trimStart());
-                    if (current.required && !val) {
+                    if (current.required && !current.default && !val) {
                         return (await message.channel.send(
                             getErrorEmbed()
                                 .setTitle("Could not execute command")
