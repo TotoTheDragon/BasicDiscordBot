@@ -1,8 +1,8 @@
 import { Message } from "discord.js";
-import { IGuildSettings } from "../database/schemas/Guild";
+import { Settings } from "./Settings";
 
 export class WrappedMessage extends Message {
 
-    settings: IGuildSettings;
+    settings: Settings;
 
 }

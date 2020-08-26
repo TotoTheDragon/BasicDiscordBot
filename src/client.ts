@@ -1,13 +1,14 @@
 import { Client, Collection } from "discord.js";
-import { readdir, stat } from "fs/promises";
+import { readdir, readFile, stat, writeFile } from "fs/promises";
 import mongoose, { Connection } from "mongoose";
-import { updateSettings } from "./database/DatabaseUtil";
+import { mongourl } from "./config";
 import { Command } from "./objects/commands/Command";
 import { Event } from "./objects/Event";
 import { GuildWrapper } from "./objects/GuildWrapper";
-import { findFiles } from "./util/FileUtil";
-import { mongourl } from "./config";
+import { IModule } from "./objects/modules/IModule";
 import { Pair } from "./objects/Pair";
+import { Settings } from "./objects/Settings";
+import { doesFileExist, findFiles } from "./util/FileUtil";
 
 export class WrappedClient extends Client {
 
@@ -15,6 +16,11 @@ export class WrappedClient extends Client {
 
     commands: Collection<string, Command>;
     aliases: Collection<string, Command>;
+
+    modules: Collection<string, IModule>;
+
+    settings: Settings;
+
     wrappedGuilds: Collection<string, GuildWrapper>;
 
     database: Connection;
@@ -24,79 +30,130 @@ export class WrappedClient extends Client {
         this.commands = new Collection;
         this.aliases = new Collection;
         this.wrappedGuilds = new Collection;
-        this.initialize();
+        this.modules = new Collection;
+        this.settings = new Settings();
         WrappedClient.instance = this;
     }
 
-    private async initialize(): Promise<void> {
+    async initialize(): Promise<void> {
         await this.loadAllModules(true, true);
-        this.loadDatabase();
+        await this.createSettings();
+        await this.loadSettings();
+        await this.loadDatabase();
+    }
+
+    async indexModules(): Promise<Map<string, string>> {
+        const folders = await Promise.all((await readdir("./modules/")).filter(async f => (await stat(`./modules/${f}`)).isDirectory()).map(f => `./modules/${f}/`));
+        folders.unshift("./");
+
+        const modules: Map<string, string> = new Map();
+
+        for (let i = 0; i < folders.length; i++) {
+            const path = folders[i];
+            const files = await findFiles(`${path}`, false);
+            if (files.includes("Module.ts")) {
+                let props = await import(`${path}/Module`);
+                const module: IModule = new props[Object.keys(props)[0]]();
+                this.modules.set(module.identifier, module);
+                modules.set(module.identifier, path);
+            }
+        }
+
+        return modules;
     }
 
     async loadAllModules(commands: boolean, events: boolean): Promise<Pair<number, number>> {
-        if (commands) this.commands.clear();
-        if (events) this.removeAllListeners();
-        await this.loadModule(commands, events);
-        const files = await Promise.all((await readdir("./modules/")).filter(async f => (await stat(`./modules/${f}`)).isDirectory()));
         return new Promise(async resolve => {
-            for (let i = 0; i < files.length; i++) {
-                await this.loadModule(commands, events, files[i]);
+            if (commands) this.commands.clear();
+            if (events) this.removeAllListeners();
+            const modules: Map<string, string> = await this.indexModules();
+            const mods = Array.from(modules);
+            for (let i = 0; i < mods.length; i++) {
+                await this.loadModule(commands, events, mods[i][1], mods[i][0]);
             }
             resolve(new Pair(commands ? this.commands.size : undefined, events ? this.getEventCount() : undefined));
         });
-
     }
 
-    async loadCommands(folderpath: string): Promise<number> {
-        return new Promise(async res => {
-            const tsfiles = (await findFiles(`${folderpath}commands`, true)).filter(f => f.endsWith(".ts") || f.endsWith(".js"))
-            if (tsfiles.length > 0)
-                for (const file of tsfiles) {
-                    let props = await import(`${folderpath}commands/${file}`);
-                    const com: Command = new props[Object.keys(props)[0]]();
-                    this.commands.set(com.label, com);
-                    if (com.aliases) com.aliases.forEach(alias => this.aliases.set(alias, com));
-                    delete require.cache[require.resolve(`${folderpath}commands/${file}`)];
-                }
-            res(tsfiles.length);
-        })
-
-    }
-
-    async loadEvents(folderpath: string): Promise<number> {
-        return new Promise(async res => {
-            const tsfiles = (await findFiles(`${folderpath}events/`, true)).filter(f => f.endsWith(".ts") || f.endsWith(".js"))
-            if (tsfiles.length > 0)
-                for (const file of tsfiles) {
-                    const props = await import(`${folderpath}events/${file}`);
-                    const ev: Event = new props[Object.keys(props)[0]]();
-                    if (ev.type === "on") this.on(ev.event as any, ev.listener.bind(null, this));
-                    if (ev.type === "once") this.once(ev.event as any, ev.listener.bind(null, this));
-                    delete require.cache[require.resolve(`${folderpath}events/${file}`)];
-                }
-            res(tsfiles.length);
-        })
-    }
-
-    async loadModule(commands: boolean, events: boolean, moduleName?: string): Promise<void> {
-        const folderPath = moduleName ? `./modules/${moduleName}/` : "./";
-        const loadedCmds = commands ? await this.loadCommands(folderPath) : 0;
-        const loadedEvents = events ? await this.loadEvents(folderPath) : 0;
-        console.log(`Loaded module: ${moduleName || "Main bot"}`)
+    async loadModule(commands: boolean, events: boolean, path: string, module: string): Promise<void> {
+        const loadedCmds = commands ? await this.loadCommands(module, path) : 0;
+        const loadedEvents = events ? await this.loadEvents(module, path) : 0;
+        this.modules.get(module).commands = loadedCmds;
+        this.modules.get(module).events = loadedEvents;
+        console.log(`Loaded module: ${this.modules.get(module).name}`)
         console.log(`Loaded ${loadedCmds} commands (Total ${this.commands.size})`);
         console.log(`Loaded ${loadedEvents} events (Total ${this.getEventCount()})`);
         console.log("--------------------");
     }
 
-    loadDatabase() {
-        mongoose.connect(mongourl, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true, useCreateIndex: true });
-        this.database = mongoose.connection;
-        this.database.on("open", () => console.log("Opened connection to database"));
+    async loadCommands(module: string, path: string): Promise<number> {
+        return new Promise(async res => {
+            const tsfiles = (await findFiles(`${path}commands`, true)).filter(f => f.endsWith(".ts") || f.endsWith(".js"))
+            if (tsfiles.length > 0)
+                for (const file of tsfiles) {
+                    let props = await import(`${path}commands/${file}`);
+                    const com: Command = new props[Object.keys(props)[0]]();
+                    com.module = module;
+                    this.commands.set(com.label, com);
+                    if (com.aliases) com.aliases.forEach(alias => this.aliases.set(alias, com));
+                    delete require.cache[require.resolve(`${path}commands/${file}`)];
+                }
+            res(tsfiles.length);
+        })
     }
 
-    getEventCount(): number {
-        return this.eventNames().map(f => this.listenerCount(f)).reduce((a, b) => a + b);
+    async loadEvents(module: string, path: string): Promise<number> {
+        return new Promise(async res => {
+            const tsfiles = (await findFiles(`${path}events/`, true)).filter(f => f.endsWith(".ts") || f.endsWith(".js"))
+            if (tsfiles.length > 0)
+                for (const file of tsfiles) {
+                    const props = await import(`${path}events/${file}`);
+                    const ev: Event = new props[Object.keys(props)[0]]();
+                    if (ev.type === "on") this.on(ev.event as any, ev.listener.bind(null, this));
+                    if (ev.type === "once") this.once(ev.event as any, ev.listener.bind(null, this));
+                    delete require.cache[require.resolve(`${path}events/${file}`)];
+                }
+            res(tsfiles.length);
+        })
     }
+
+    async createSettings(): Promise<void> {
+        return new Promise(async resolve => {
+            if (!(await doesFileExist("./settings.json"))) await writeFile("./settings.json", JSON.stringify("{}"))
+            const buffer = await readFile("./settings.json");
+            const json: any = JSON.parse(buffer.toString())
+            this.modules.forEach(module => {
+                if (json[module.identifier] == undefined && module.getGlobalSettings().size > 0) json[module.identifier] = {};
+                module.getGlobalSettings().forEach((value, key) => { if (json[module.identifier][key] == undefined) json[module.identifier][key] = value })
+            })
+            await writeFile("./settings.json", JSON.stringify(json, null, 2));
+            resolve();
+        });
+    }
+
+    async loadSettings(): Promise<void> {
+        return new Promise(async resolve => {
+            if (!(await doesFileExist("./settings.json"))) return console.log("Could not load settings file!");
+            const buffer = await readFile("./settings.json");
+            const json: any = JSON.parse(buffer.toString())
+            this.modules.forEach(module => {
+                module.getGlobalSettings().forEach((value, key) => {
+                    this.settings.set(module.identifier, key, json[module.identifier] !== undefined ? json[module.identifier][key] : value);
+                })
+            })
+            resolve();
+        });
+    }
+
+    async loadDatabase() {
+        return new Promise(resolve => {
+            mongoose.connect(mongourl, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true, useCreateIndex: true });
+            this.database = mongoose.connection;
+            this.database.on("open", () => resolve(console.log("Successfully connected to database")));
+        });
+    }
+
+    getEventCount = () => this.eventNames().map(f => this.listenerCount(f)).reduce((a, b) => a + b);
 
     async getSettings(guild?: string): Promise<GuildWrapper> {
         return new Promise(async resolve => {
@@ -111,8 +168,11 @@ export class WrappedClient extends Client {
 
     setSettings(wrapper: GuildWrapper) {
         wrapper.loadDefaults(); // Make sure there are no undefined settings
-        updateSettings(wrapper.guild, wrapper.settings); // Update settings in database to keep them persistent
         this.wrappedGuilds.set(wrapper.guild, wrapper);
+    }
+
+    getGlobalSettings(): Settings {
+        return this.settings;
     }
 
 }

@@ -1,6 +1,9 @@
 import { WrappedClient } from "../client";
 import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
+import { readdir, stat } from "fs/promises";
+import { findFiles } from "../util/FileUtil";
+import { IModule } from "../objects/modules/IModule";
 
 export class Test implements Command {
     label = "test";
@@ -10,7 +13,9 @@ export class Test implements Command {
     allowInDM = true;
 
     run = async (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
-
+        console.log(await client.indexModules())
     }
+
+
 
 }

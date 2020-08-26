@@ -1,13 +1,10 @@
-import { Message, MessageEmbed } from "discord.js";
+import { Message } from "discord.js";
 import { WrappedClient } from "../client";
-import { footer, footerurl } from "../config";
-import { Event } from "../objects/Event";
-import { WrappedMessage } from "../objects/WrappedMessage";
-import { IGuildSettings } from "../database/schemas/Guild";
-import { getErrorEmbed, getNoPermissionEmbed } from "../util/EmbedUtil";
-import { settings } from "cluster";
-import { getUserLevel } from "../util/OtherUtil";
 import { CommandInfo } from "../objects/commands/CommandInfo";
+import { Event } from "../objects/Event";
+import { Settings } from "../objects/Settings";
+import { WrappedMessage } from "../objects/WrappedMessage";
+import { getErrorEmbed } from "../util/EmbedUtil";
 
 export class CommandHandler implements Event {
     event = "message";
@@ -17,23 +14,30 @@ export class CommandHandler implements Event {
         if (message.author.bot) return;
 
         let wrappedMessage: WrappedMessage = message as WrappedMessage;
+        let guildSettings: Settings = (await client.getSettings(message.guild?.id)).settings; // Get settings for the guild
+        console.log(guildSettings);
 
-        let guildSettings: IGuildSettings = (await client.getSettings(message.guild?.id)).settings; // Get settings for the guild
+        /* Values for testing stuff */
+
+        // guildSettings.roleLevels.set("747576551020822579", 100);
+        // guildSettings.roleLevels.set("554319597264830474", 100);
 
         wrappedMessage.settings = guildSettings;
         const cmdInfo: CommandInfo = new CommandInfo(wrappedMessage);
 
-        if (!(message.content.startsWith(guildSettings.prefix) || (message.mentions.users.find(u => u.id == client.user.id)))) return; // Ignore messages that do not have prefix
-        let sliceLength = message.content.startsWith(guildSettings.prefix) ? guildSettings.prefix.length : client.user.id.length + 4; // Get amount of characters before command
+        if (!(message.content.startsWith(guildSettings.get("bot", "prefix")) || (message.mentions.users.find(u => u.id == client.user.id)))) return; // Ignore messages that do not have prefix
+        let sliceLength = message.content.startsWith(guildSettings.get("bot", "prefix")) ? guildSettings.get("bot", "prefix").length : client.user.id.length + 4; // Get amount of characters before command
 
         const args: string[] = message.content.slice(sliceLength).trim().split(" ");
         const command: string = args.shift();
-
+        console.log(args);
+        console.log(command);
         if (client.commands.has(command) || client.aliases.has(command)) { // Check if command exists
             let cmd = (client.commands.get(command) || client.aliases.get(command)); // Get command
 
             if (cmdInfo.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and check if that is allowed
 
+            /*
             if ((guildSettings.cmdLevels.get(cmd.label) ? guildSettings.cmdLevels.get(cmd.label) : cmd.defaultLevel) > getUserLevel(cmdInfo)) {
                 return (await message.channel.send(
                     getNoPermissionEmbed()
@@ -42,6 +46,7 @@ export class CommandHandler implements Event {
                         .getAsEmbed()
                 )).delete({ timeout: 5000 });
             }
+            */
 
             const argmap: Map<string, any> = new Map();
 
@@ -63,8 +68,10 @@ export class CommandHandler implements Event {
 
                 }
             }
+
             cmd.run(client, cmdInfo, args, argmap);
         }
+
     };
 
 }
