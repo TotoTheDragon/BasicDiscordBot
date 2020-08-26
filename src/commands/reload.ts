@@ -19,7 +19,7 @@ export class Reload implements Command {
 
     run = async (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
 
-        let type: string = mappedArgs.get("type").toLowerCase();
+        let type: string = mappedArgs.get("type") ? mappedArgs.get("type").toLowerCase() : undefined;
 
         let reloadCommands: boolean = type ? ["cmd", "command", "commands"].includes(type) : true;
         let reloadEvents: boolean = type ? ["event", "events"].includes(type) : true;
