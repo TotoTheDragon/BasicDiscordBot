@@ -166,4 +166,10 @@ export class WrappedClient extends Client {
         return (await this.getGuild(paramGuild)).settings;
     }
 
+    updateGuildSettings(paramGuild: string, settings: Settings) {
+        const wrapper = this.wrappedGuilds.get(paramGuild);
+        wrapper.settings = settings;
+        this.wrappedGuilds.set(paramGuild, wrapper);
+    }
+
 }
