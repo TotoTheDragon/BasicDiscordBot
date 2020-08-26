@@ -16,10 +16,8 @@ export class Settings {
         return this;
     }
 
-    get(module: string, setting: string): any {
-        return this.settings.get(`${module}_${setting}`);
-    }
+    get = (module: string, setting: string): any => this.settings.get(`${module}_${setting}`);
 
-
+    getFull = (path: string): any => this.settings.get(path);
 
 }
