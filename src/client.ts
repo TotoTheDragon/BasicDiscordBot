@@ -1,7 +1,6 @@
 import { Client, Collection } from "discord.js";
 import { readdir, readFile, stat, writeFile } from "fs/promises";
 import mongoose, { Connection } from "mongoose";
-import { mongourl } from "./config";
 import { Command } from "./objects/commands/Command";
 import { Event } from "./objects/Event";
 import { GuildWrapper } from "./objects/GuildWrapper";
@@ -119,7 +118,7 @@ export class WrappedClient extends Client {
 
     async createSettings(): Promise<void> {
         return new Promise(async resolve => {
-            if (!(await doesFileExist("./settings.json"))) await writeFile("./settings.json", JSON.stringify("{}"))
+            if (!(await doesFileExist("./settings.json"))) await writeFile("./settings.json", JSON.stringify({}))
             const buffer = await readFile("./settings.json");
             const json: any = JSON.parse(buffer.toString())
             this.modules.forEach(module => {
@@ -147,7 +146,7 @@ export class WrappedClient extends Client {
 
     async loadDatabase() {
         return new Promise(resolve => {
-            mongoose.connect(mongourl, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true, useCreateIndex: true });
+            mongoose.connect("mongodb://localhost:27017/boilerbot", { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true, useCreateIndex: true });
             this.database = mongoose.connection;
             this.database.on("open", () => resolve(console.log("Successfully connected to database")));
         });
@@ -155,24 +154,16 @@ export class WrappedClient extends Client {
 
     getEventCount = () => this.eventNames().map(f => this.listenerCount(f)).reduce((a, b) => a + b);
 
-    async getSettings(guild?: string): Promise<GuildWrapper> {
+    async getGuild(paramGuild: string): Promise<GuildWrapper> {
         return new Promise(async resolve => {
-            if (!guild || !this.wrappedGuilds.has(guild)) {
-                const wrapper: GuildWrapper = await GuildWrapper.getWrapper(guild);
-                if (!guild) resolve(wrapper);
-                if (!this.wrappedGuilds.has(guild)) this.wrappedGuilds.set(guild, wrapper);
-            }
-            resolve(this.wrappedGuilds.get(guild));
+            if (paramGuild === undefined || paramGuild.length <= 0) resolve(await GuildWrapper.getWrapper(""))
+            if (!this.wrappedGuilds.has(paramGuild)) this.wrappedGuilds.set(paramGuild, (await GuildWrapper.getWrapper(paramGuild)));
+            resolve(this.wrappedGuilds.get(paramGuild));
         });
     }
 
-    setSettings(wrapper: GuildWrapper) {
-        wrapper.loadDefaults(); // Make sure there are no undefined settings
-        this.wrappedGuilds.set(wrapper.guild, wrapper);
-    }
-
-    getGlobalSettings(): Settings {
-        return this.settings;
+    async getGuildSettings(paramGuild: string): Promise<Settings> {
+        return (await this.getGuild(paramGuild)).settings;
     }
 
 }
