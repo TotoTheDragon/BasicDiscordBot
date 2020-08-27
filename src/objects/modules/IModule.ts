@@ -1,7 +1,8 @@
 import { CommandInfo } from "../commands/CommandInfo";
 import { IConfiguration } from "./IConfiguration";
+import { Toggleable } from "../Toggleable";
 
-export abstract class IModule {
+export abstract class IModule extends Toggleable {
 
     /*
         Info about the module
