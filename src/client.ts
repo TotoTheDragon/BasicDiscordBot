@@ -87,7 +87,7 @@ export class WrappedClient extends Client {
 
     async loadCommands(module: string, path: string): Promise<number> {
         return new Promise(async res => {
-            const tsfiles = (await findFiles(`${path}commands`, true)).filter(f => f.endsWith(".ts") || f.endsWith(".js"))
+            const tsfiles = (await findFiles(`${path}commands`, true)).filter(f => !f.includes("subcommand")).filter(f => f.endsWith(".ts") || f.endsWith(".js"))
             if (tsfiles.length > 0)
                 for (const file of tsfiles) {
                     let props = await import(`${path}commands/${file}`);
