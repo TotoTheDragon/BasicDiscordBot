@@ -1,4 +1,4 @@
-import { Message, TextChannel, NewsChannel, DMChannel, User, GuildMember, Guild } from "discord.js";
+import { DMChannel, Guild, GuildMember, NewsChannel, TextChannel, User } from "discord.js";
 import { WrappedMessage } from "../WrappedMessage";
 
 export class CommandInfo {
@@ -27,4 +27,9 @@ export class CommandInfo {
         this.guildchannel = this.hasGuild ? paramMessage.channel as TextChannel | NewsChannel : undefined;
         this.member = this.hasGuild ? this.message.guild.member(this.user) : undefined;
     }
+
+    findChannelById(paramId: string): TextChannel | NewsChannel {
+        return this.guild.channels.cache.find(channel => channel.id === paramId) as TextChannel | NewsChannel;
+    }
+
 }
