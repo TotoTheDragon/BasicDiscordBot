@@ -10,6 +10,6 @@ export interface Command {
     defaultLevel: number,
     allowInDM: boolean;
     aliases?: string[],
-    arguments?: CommandArgument[],
+    arguments?: CommandArgument<any>[],
     run: (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => void
 }
