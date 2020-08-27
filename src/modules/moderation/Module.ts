@@ -1,5 +1,5 @@
 import { IModule } from "../../objects/modules/IModule";
-import { CommandInfo } from "../../objects/commands/CommandInfo";
+import { Configuration } from "./Configuration";
 
 export class Module extends IModule {
     name = "Moderation";
@@ -9,4 +9,5 @@ export class Module extends IModule {
     dependencies = [];
     botSetupEnabled = false;
     guildSetupEnabled = false;
+    configuration = new Configuration();
 }
