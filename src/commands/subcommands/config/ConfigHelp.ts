@@ -4,9 +4,8 @@ import { Command } from "../../../objects/commands/Command";
 import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { EmbedStyle } from "../../../objects/EmbedStyle";
 import { getInfoEmbed } from "../../../util/EmbedUtil";
-import { Toggleable } from "../../../objects/Toggleable";
 
-export class ConfigHelp extends Toggleable implements Command {
+export class ConfigHelp extends Command {
     label = "help";
     description = "Used to configure settings for your modules";
     category = "Server Owner";
