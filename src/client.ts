@@ -3,10 +3,10 @@ import { readdir, readFile, stat, writeFile } from "fs/promises";
 import mongoose, { Connection } from "mongoose";
 import { Command } from "./objects/commands/Command";
 import { Event } from "./objects/Event";
-import { GuildWrapper } from "./objects/GuildWrapper";
+import { GuildWrapper } from "./objects/bot/GuildWrapper";
 import { IModule } from "./objects/modules/IModule";
 import { Pair } from "./objects/Pair";
-import { Settings } from "./objects/Settings";
+import { Settings } from "./objects/bot/Settings";
 import { doesFileExist, findFiles } from "./util/FileUtil";
 
 export class WrappedClient extends Client {

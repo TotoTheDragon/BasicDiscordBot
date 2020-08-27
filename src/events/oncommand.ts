@@ -4,8 +4,8 @@ import { SubCommandArgument } from "../objects/commands/arguments/SubCommandArgu
 import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
 import { Event } from "../objects/Event";
-import { Settings } from "../objects/Settings";
-import { WrappedMessage } from "../objects/WrappedMessage";
+import { Settings } from "../objects/bot/Settings";
+import { WrappedMessage } from "../objects/bot/WrappedMessage";
 import { getErrorEmbed } from "../util/EmbedUtil";
 
 export class CommandHandler implements Event {

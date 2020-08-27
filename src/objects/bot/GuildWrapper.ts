@@ -1,7 +1,6 @@
-import { WrappedClient } from "../client";
+import { WrappedClient } from "../../client";
+import "../../util/MapUtil";
 import { Settings } from "./Settings";
-import { getSettings } from "../database/DatabaseUtil";
-import "../util/MapUtil";
 
 export class GuildWrapper {
 
