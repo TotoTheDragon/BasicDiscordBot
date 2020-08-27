@@ -1,12 +1,11 @@
-import { Command } from "../objects/commands/Command";
-import { StringArgument } from "../objects/commands/arguments/StringArgument";
 import { WrappedClient } from "../client";
+import { StringArgument } from "../objects/commands/arguments/StringArgument";
+import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
-import { getInfoEmbed, getErrorEmbed } from "../util/EmbedUtil";
-import { info } from "console";
 import { IModule } from "../objects/modules/IModule";
+import { getErrorEmbed, getInfoEmbed } from "../util/EmbedUtil";
 
-export class Modules implements Command {
+export class Modules extends Command {
     label = "modules";
     description = "Manage the modules in the bot";
     category = "Developer";
@@ -17,7 +16,7 @@ export class Modules implements Command {
         new StringArgument().setIdentifier("sub1").setRequired(false).setLimit(1),
         new StringArgument().setIdentifier("arg1").setRequired(false).setLimit(1)
     ];
-    run = (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
+    run = async (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
         const sub1: string = (mappedArgs.get("sub1") || "list").toLowerCase();
         if (sub1 === "list") {
             const embed = getInfoEmbed()

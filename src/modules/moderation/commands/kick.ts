@@ -6,7 +6,7 @@ import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { User, GuildMember, Message, MessageEmbed } from "discord.js";
 import { footer, footerurl } from "../../../config";
 
-export class Kick implements Command {
+export class Kick extends Command {
     label = "kick";
     description = "Used to kick users";
     category = "Moderation";

@@ -6,7 +6,7 @@ import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { IModule } from "../../../objects/modules/IModule";
 import { getInfoEmbed } from "../../../util/EmbedUtil";
 
-export class ConfigReset implements Command {
+export class ConfigReset extends Command {
     label = "reset";
     description = "Used to configure settings for your modules";
     category = "Server Owner";

@@ -6,8 +6,9 @@ import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { EmbedStyle } from "../../../objects/EmbedStyle";
 import { IModule } from "../../../objects/modules/IModule";
 import { getInfoEmbed } from "../../../util/EmbedUtil";
+import { Toggleable } from "../../../objects/Toggleable";
 
-export class ConfigInfo implements Command {
+export class ConfigInfo extends Toggleable implements Command {
     label = "info";
     description = "Used to configure settings for your modules";
     category = "Server Owner";

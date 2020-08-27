@@ -5,7 +5,7 @@ import { readdir, stat } from "fs/promises";
 import { findFiles } from "../util/FileUtil";
 import { IModule } from "../objects/modules/IModule";
 
-export class Test implements Command {
+export class Test extends Command {
     label = "test";
     description = "A test command for developers";
     category = "Developer";

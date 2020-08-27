@@ -8,7 +8,7 @@ import { User, GuildMember, Message, MessageEmbed } from "discord.js";
 import { parseTimeFromXtoY } from "../../../util/TimeUtil";
 import { footer, footerurl } from "../../../config";
 
-export class Ban implements Command {
+export class Ban extends Command {
     aliases?: string[];
     label = "ban";
     description = "Used to ban a user";

@@ -1,9 +1,9 @@
-import { Client, Message, MessageEmbed } from "discord.js";
+import { Client, MessageEmbed } from "discord.js";
 import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
 
 
-export class Information implements Command {
+export class Information extends Command {
     label = "information";
     aliases = ["info"];
     description = "This command is used to get information about the bot";
@@ -11,7 +11,7 @@ export class Information implements Command {
     defaultLevel = 0;
     allowInDM = true;
 
-    async run(client: Client, info: CommandInfo, args: string[]) {
+    run = async (client: Client, info: CommandInfo, args: string[]) => {
 
         info.channel.send(
             new MessageEmbed()

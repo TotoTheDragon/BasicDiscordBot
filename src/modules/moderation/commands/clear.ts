@@ -5,7 +5,7 @@ import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { TextChannel, MessageEmbed } from "discord.js";
 import { footer, footerurl } from "../../../config";
 
-export class Clear implements Command {
+export class Clear extends Command {
     label = "clear";
     description = "Used to clear messages";
     category = "Moderation";

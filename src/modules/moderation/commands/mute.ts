@@ -5,7 +5,7 @@ import { UserArgument } from "../../../objects/commands/arguments/UserArgument";
 import { Command } from "../../../objects/commands/Command";
 import { CommandInfo } from "../../../objects/commands/CommandInfo";
 
-export class Mute implements Command {
+export class Mute extends Command {
     label = "mute";
     description = "Used to mute players";
     category = "Moderation";

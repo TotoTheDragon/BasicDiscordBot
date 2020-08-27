@@ -6,7 +6,7 @@ import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
 import { Pair } from "../objects/Pair";
 
-export class Reload implements Command {
+export class Reload extends Command {
     label = "reload";
     description = "This is a command for the developer to reload commands/events";
     category = "Developer";

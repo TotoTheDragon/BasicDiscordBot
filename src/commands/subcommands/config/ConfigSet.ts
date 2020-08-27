@@ -6,7 +6,7 @@ import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { IModule } from "../../../objects/modules/IModule";
 import { getInfoEmbed } from "../../../util/EmbedUtil";
 
-export class ConfigSet implements Command {
+export class ConfigSet extends Command {
     label = "set";
     description = "Used to configure settings for your modules";
     category = "Server Owner";

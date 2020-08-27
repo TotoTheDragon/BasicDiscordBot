@@ -8,7 +8,7 @@ import { ConfigList } from "./subcommands/config/ConfigList";
 import { ConfigReset } from "./subcommands/config/ConfigReset";
 import { ConfigSet } from "./subcommands/config/ConfigSet";
 
-export class Config implements Command {
+export class Config extends Command {
     label = "config";
     description = "Used to configure settings for your modules";
     category = "Server Owner";

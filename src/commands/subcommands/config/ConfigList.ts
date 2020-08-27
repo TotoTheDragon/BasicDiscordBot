@@ -7,7 +7,7 @@ import { IModule } from "../../../objects/modules/IModule";
 import { EmbedStyle } from "../../../objects/EmbedStyle";
 import { getInfoEmbed } from "../../../util/EmbedUtil";
 
-export class ConfigList implements Command {
+export class ConfigList extends Command {
     label = "list";
     description = "Used to configure settings for your modules";
     category = "Server Owner";

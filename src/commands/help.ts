@@ -2,13 +2,13 @@ import { Message } from "discord.js";
 import { WrappedClient } from "../client";
 import { StringArgument } from "../objects/commands/arguments/StringArgument";
 import { Command } from "../objects/commands/Command";
-import { WrappedMessage } from "../objects/WrappedMessage";
+import { WrappedMessage } from "../objects/bot/WrappedMessage";
 import { getInfoEmbed, getErrorEmbed } from "../util/EmbedUtil";
 import { utils } from "../util/EmojiUtil";
 import { CommandInfo } from "../objects/commands/CommandInfo";
 
 
-export class Help implements Command {
+export class Help extends Command {
     label = "help";
     description = "This will help you with finding command usages";
     category = "Other";
@@ -18,7 +18,7 @@ export class Help implements Command {
         new StringArgument().setName("command").setIdentifier("cmd").setRequired(false).setLimit(1)
     ]
 
-    async run(client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) {
+    run = async (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
 
         const cmd: string = mappedArgs.get("cmd");
 
