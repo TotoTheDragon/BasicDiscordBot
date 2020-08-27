@@ -1,5 +1,5 @@
 import { DMChannel, Guild, GuildMember, NewsChannel, TextChannel, User } from "discord.js";
-import { WrappedMessage } from "../WrappedMessage";
+import { WrappedMessage } from "../bot/WrappedMessage";
 
 export class CommandInfo {
     message: WrappedMessage;
