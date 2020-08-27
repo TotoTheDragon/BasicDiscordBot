@@ -37,12 +37,17 @@ export class UserArgument implements CommandArgument<User> {
     }
 
     parse = (paramString: string): User => {
-        let user = paramString.split(" ")[0];
-        let targetId = user.startsWith("<@!") ? user.slice(3, user.length - 1) : user;
+        let targetId = this.parseId(paramString);
         return WrappedClient.instance.users.cache.find(u => u.id == targetId);
     };
 
     slice = (paramString: string): string => {
         return paramString.split(" ").slice(1).join(" ");
     }
+
+    parseId = (paramString: string): string => {
+        let user = paramString.split(" ")[0];
+        return user.startsWith("<@!") ? user.slice(3, user.length - 1) : user;
+    };
+
 }
