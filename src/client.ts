@@ -17,6 +17,7 @@ export class WrappedClient extends Client {
     aliases: Collection<string, Command>;
 
     modules: Collection<string, IModule>;
+    variables: Collection<string, any>;
 
     settings: Settings;
 
@@ -30,6 +31,7 @@ export class WrappedClient extends Client {
         this.aliases = new Collection;
         this.wrappedGuilds = new Collection;
         this.modules = new Collection;
+        this.variables = new Collection;
         this.settings = new Settings();
         WrappedClient.instance = this;
     }
@@ -42,7 +44,11 @@ export class WrappedClient extends Client {
     }
 
     async indexModules(): Promise<Map<string, string>> {
-        const folders = await Promise.all((await readdir("./modules/")).filter(async f => (await stat(`./modules/${f}`)).isDirectory()).map(f => `./modules/${f}/`));
+        const folders = await Promise
+            .all((await readdir("./modules/"))
+                .filter(async f => (await stat(`./modules/${f}`)).isDirectory())
+                .map(f => `./modules/${f}/`));
+
         folders.unshift("./");
 
         const modules: Map<string, string> = new Map();
@@ -60,6 +66,7 @@ export class WrappedClient extends Client {
 
         return modules;
     }
+
 
     async loadAllModules(commands: boolean, events: boolean): Promise<Pair<number, number>> {
         return new Promise(async resolve => {
@@ -108,6 +115,7 @@ export class WrappedClient extends Client {
                 for (const file of tsfiles) {
                     const props = await import(`${path}events/${file}`);
                     const ev: Event = new props[Object.keys(props)[0]]();
+                    ev.module = module;
                     if (ev.type === "on") this.on(ev.event as any, ev.listener.bind(null, this));
                     if (ev.type === "once") this.once(ev.event as any, ev.listener.bind(null, this));
                     delete require.cache[require.resolve(`${path}events/${file}`)];
@@ -170,6 +178,14 @@ export class WrappedClient extends Client {
         const wrapper = this.wrappedGuilds.get(paramGuild);
         wrapper.settings = settings;
         this.wrappedGuilds.set(paramGuild, wrapper);
+    }
+
+    setVariable(module: string, name: string, variable: any) {
+        this.variables.set(`${module}_${name}`, variable);
+    }
+
+    getVariable(module: string, name: string): any {
+        return this.variables.get(`${module}_${name}`);
     }
 
 }
