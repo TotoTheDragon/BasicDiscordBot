@@ -11,6 +11,8 @@ node_modules/
 data/
 dist/
 
+src/modules/empirebot/
+
 src/menus/
 
 src/config.ts
