@@ -7,6 +7,7 @@ import { Event } from "../objects/Event";
 import { Settings } from "../objects/bot/Settings";
 import { WrappedMessage } from "../objects/bot/WrappedMessage";
 import { getErrorEmbed } from "../util/EmbedUtil";
+import { EmbedStyle } from "../objects/EmbedStyle";
 
 export class CommandHandler implements Event {
     event = "message";
@@ -27,11 +28,26 @@ export class CommandHandler implements Event {
 
         const args: string[] = message.content.slice(sliceLength).trim().split(" ");
         const command: string = args.shift();
-        if (client.commands.has(command) || client.aliases.has(command))  // Check if command exists
-            this.runCommand(client, wrappedMessage, (client.commands.get(command) || client.aliases.get(command)), args);
+        if (client.commands.has(command) || client.aliases.has(command)) {  // Check if command exists
+            const cmd = (client.commands.get(command) || client.aliases.get(command));
+            const module = client.modules.get(cmd.module);
+            if (!module.isEnabled || !module.isEnabledGuild(cmdInfo.guild.id)) {
+                const disabled: EmbedStyle = getErrorEmbed()
+                    .setDescription("This module has been disabled");
+                return message.channel.send(disabled.getAsEmbed());
+            }
+
+
+
+
+            this.runCommand(client, wrappedMessage, cmd, args);
+        }
     };
 
     async runCommand(client: WrappedClient, message: WrappedMessage, cmd: Command, args: string[], argmap?: Map<string, any>) {
+
+
+
         if (message.info.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and if that is allowed
 
         /*
