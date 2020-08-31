@@ -26,8 +26,14 @@ export class GuildWrapper {
         })
     }
 
-    disableModule = (module: string) => this.disabledModules.add(module);
-    enableModule = (module: string) => this.disabledModules.delete(module);
+    disableModule = (module: string) => {
+        WrappedClient.instance.modules.get(module).disableGuild(this.guild);
+        this.disabledModules.add(module);
+    }
+    enableModule = (module: string) => {
+        WrappedClient.instance.modules.get(module).enableGuid(this.guild);
+        this.disabledModules.delete(module);
+    }
 
 }
 
