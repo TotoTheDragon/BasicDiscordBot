@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
+        "target": "esnext",
         "module": "commonjs",
-        "target": "es2018",
-        "outDir": "dist",
         "lib": [
             "ESNext",
             "ESNext.Array",
@@ -11,7 +10,10 @@
             "ESNext.Symbol",
             "DOM"
         ],
+        "outDir": "dist",
         "strictFunctionTypes": false,
+        "skipLibCheck": true,
+        "downlevelIteration": true,
         "sourceMap": false,
         "inlineSourceMap": true,
         "inlineSources": true,
@@ -21,7 +23,7 @@
         "emitDecoratorMetadata": true
     },
     "include": [
-        "src/**/*"
+        "src/**/*.ts"
     ],
     "exclude": [
         "node_modules"
