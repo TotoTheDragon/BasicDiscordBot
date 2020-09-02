@@ -43,13 +43,11 @@ export abstract class IModule extends Toggleable {
     commands: number = 0;
     events: number = 0;
 
-    getGuildSettings(prefixed: boolean = true): Map<string, any> {
-        if (prefixed) return (this.configuration !== undefined && this.configuration.guildSettings !== undefined) ? this.configuration.guildSettings.mapKeys((value, key) => `${this.identifier}_${key}`) : new Map();
+    getGuildSettings(): Map<string, any> {
         return (this.configuration !== undefined && this.configuration.guildSettings !== undefined) ? this.configuration.guildSettings : new Map();
     }
 
-    getGlobalSettings(prefixed: boolean = false): Map<string, any> {
-        if (prefixed) return (this.configuration !== undefined && this.configuration.globalSettings !== undefined) ? this.configuration.globalSettings.mapKeys((value, key) => `${this.identifier}_${key}`) : new Map();
+    getGlobalSettings(): Map<string, any> {
         return (this.configuration !== undefined && this.configuration.globalSettings !== undefined) ? this.configuration.globalSettings : new Map();
     }
 

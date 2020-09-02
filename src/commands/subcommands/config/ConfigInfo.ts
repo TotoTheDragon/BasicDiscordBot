@@ -27,7 +27,7 @@ export class ConfigInfo extends Command {
         const style: EmbedStyle = getInfoEmbed()
             .setTitle(`Configuration info for module __**${module.identifier}**__`)
             .setDescription(module.description)
-            .addField("Available settings", Array.from(module.getGuildSettings(false)).map(([key, value]) => key).join(", "));
+            .addField("Available settings", Array.from(module.getGuildSettings()).map(([key, value]) => key).join(", "));
         return info.guildchannel.send(style.getAsEmbed());
     }
 

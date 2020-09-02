@@ -30,7 +30,7 @@ export class ConfigSet extends Command {
         const value: string = mappedArgs.get("value");
 
         if (!module) return console.log("No module found");
-        if (!setting || !module.getGuildSettings(false).has(setting)) return console.log("Could not find the setting");
+        if (!setting || !module.getGuildSettings().has(setting)) return console.log("Could not find the setting");
         if (value === undefined || value.length < 0) return console.log("No value found");
         if (module.configuration.guildParse.has(setting))
             settings.set(module.identifier, setting, module.configuration.guildParse.get(setting)(value));

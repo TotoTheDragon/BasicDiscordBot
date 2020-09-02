@@ -11,13 +11,19 @@ export class Settings {
         return this;
     }
 
-    set(module: string, setting: string, value: any): Settings {
-        this.settings.set(`${module}_${setting}`, value);
+    set(setting: string, value: any): Settings {
+        this.settings.set(setting, value);
         return this;
     }
 
-    get = (module: string, setting: string): any => this.settings.get(`${module}_${setting}`);
+    get = (setting: string): any => this.settings.get(setting);
 
     getFull = (path: string): any => this.settings.get(path);
+
+    toJson = (): object => {
+        let output = {};
+        this.settings.forEach((v, k) => output[k] = v);
+        return output;
+    }
 
 }

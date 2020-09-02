@@ -6,8 +6,9 @@ import { CommandInfo } from "../objects/commands/CommandInfo";
 import { Event } from "../objects/Event";
 import { Settings } from "../objects/bot/Settings";
 import { WrappedMessage } from "../objects/bot/WrappedMessage";
-import { getErrorEmbed } from "../util/EmbedUtil";
+import { getErrorEmbed, getNoPermissionEmbed } from "../util/EmbedUtil";
 import { EmbedStyle } from "../objects/EmbedStyle";
+import { ModuleSettings } from "../objects/bot/ModuleSettings";
 
 export class CommandHandler implements Event {
     event = "message";
@@ -17,7 +18,7 @@ export class CommandHandler implements Event {
         if (message.author.bot) return;
 
         let wrappedMessage: WrappedMessage = message as WrappedMessage;
-        let guildSettings: Settings = await client.getGuildSettings(message.guild?.id); // Get settings for the guild
+        let guildSettings: ModuleSettings = await client.getGuildSettings(message.guild?.id); // Get settings for the guild
 
         wrappedMessage.settings = guildSettings;
         const cmdInfo: CommandInfo = new CommandInfo(wrappedMessage);
@@ -39,7 +40,6 @@ export class CommandHandler implements Event {
 
 
 
-
             this.runCommand(client, wrappedMessage, cmd, args);
         }
     };
@@ -50,8 +50,8 @@ export class CommandHandler implements Event {
 
         if (message.info.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and if that is allowed
 
-        /*
-        if ((guildSettings.cmdLevels.get(cmd.label) ? guildSettings.cmdLevels.get(cmd.label) : cmd.defaultLevel) > getUserLevel(cmdInfo)) {
+
+        if (cmd.defaultLevel > 0 && !message.info.member.roles.cache.has(WrappedClient.instance.settings.get("bot", "admin-role"))) {
             return (await message.channel.send(
                 getNoPermissionEmbed()
                     .setTitle("Could not execute command")
@@ -59,7 +59,7 @@ export class CommandHandler implements Event {
                     .getAsEmbed()
             )).delete({ timeout: 5000 });
         }
-        */
+
         let [arg, map] = this.parseArguments(cmd, args);
         if (argmap) map = argmap.merge(map);
         args = arg.split(" ");

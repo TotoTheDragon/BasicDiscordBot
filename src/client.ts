@@ -8,6 +8,9 @@ import { IModule } from "./objects/modules/IModule";
 import { Pair } from "./objects/Pair";
 import { Settings } from "./objects/bot/Settings";
 import { doesFileExist, findFiles } from "./util/FileUtil";
+import { ModuleSettings } from "./objects/bot/ModuleSettings";
+import { StorageHolder, SQLWrapper, MySQLDatabase } from "simpledatabases";
+import { GuildHolder } from "./objects/bot/GuildHolder";
 
 export class WrappedClient extends Client {
 
@@ -19,11 +22,14 @@ export class WrappedClient extends Client {
     modules: Collection<string, IModule>;
     variables: Collection<string, any>;
 
-    settings: Settings;
+    settings: ModuleSettings;
 
     wrappedGuilds: Collection<string, GuildWrapper>;
 
     database: Connection;
+
+    storageHolder: StorageHolder;
+    mysql: SQLWrapper;
 
     constructor(options?) {
         super(options);
@@ -32,7 +38,7 @@ export class WrappedClient extends Client {
         this.wrappedGuilds = new Collection;
         this.modules = new Collection;
         this.variables = new Collection;
-        this.settings = new Settings();
+        this.settings = new ModuleSettings();
         WrappedClient.instance = this;
     }
 
@@ -40,7 +46,7 @@ export class WrappedClient extends Client {
         await this.loadAllModules(true, true);
         await this.createSettings();
         await this.loadSettings();
-        await this.loadDatabase();
+        this.loadDatabase();
     }
 
     async indexModules(): Promise<Map<string, string>> {
@@ -152,32 +158,30 @@ export class WrappedClient extends Client {
         });
     }
 
-    async loadDatabase() {
-        return new Promise(resolve => {
-            mongoose.connect("mongodb://localhost:27017/boilerbot", { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true, useCreateIndex: true });
-            this.database = mongoose.connection;
-            this.database.on("open", () => resolve(console.log("Successfully connected to database")));
-        });
+    loadDatabase() {
+        this.storageHolder = new StorageHolder();
+        this.mysql = new MySQLDatabase({ user: "simpledb", password: "simpledb", database: "simpledb" });
+        this.storageHolder.registerStorage(new GuildHolder(this.storageHolder, this.mysql));
     }
 
     getEventCount = () => this.eventNames().map(f => this.listenerCount(f)).reduce((a, b) => a + b);
 
     async getGuild(paramGuild: string): Promise<GuildWrapper> {
-        return new Promise(async resolve => {
-            if (paramGuild === undefined || paramGuild.length <= 0) resolve(await GuildWrapper.getWrapper(""))
-            if (!this.wrappedGuilds.has(paramGuild)) this.wrappedGuilds.set(paramGuild, (await GuildWrapper.getWrapper(paramGuild)));
-            resolve(this.wrappedGuilds.get(paramGuild));
-        });
+        return (this.storageHolder.getByType(new GuildWrapper()) as GuildHolder).getOrCreate(paramGuild);
     }
 
-    async getGuildSettings(paramGuild: string): Promise<Settings> {
+    async getGuildSettings(paramGuild: string): Promise<ModuleSettings> {
         return (await this.getGuild(paramGuild)).settings;
     }
 
-    updateGuildSettings(paramGuild: string, settings: Settings) {
-        const wrapper = this.wrappedGuilds.get(paramGuild);
+    updateGuild(guild: GuildWrapper): Promise<void> {
+        return (this.storageHolder.getByType(new GuildWrapper()) as GuildHolder).add(guild)
+    }
+
+    async updateGuildSettings(guild: string, settings: ModuleSettings): Promise<void> {
+        let wrapper = await this.getGuild(guild);
         wrapper.settings = settings;
-        this.wrappedGuilds.set(paramGuild, wrapper);
+        return this.updateGuild(wrapper);
     }
 
     setVariable(module: string, name: string, variable: any) {

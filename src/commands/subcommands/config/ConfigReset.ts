@@ -28,8 +28,8 @@ export class ConfigReset extends Command {
         const setting: string = mappedArgs.get("setting");
 
         if (!module) return console.log("No module found");
-        if (!setting) settings.load(Array.of(module.getGuildSettings(true)), true);
-        else settings.set(module.identifier, setting, module.getGuildSettings(false).get(setting));
+        if (!setting) settings.load(module.identifier, Array.of(module.getGuildSettings()), true);
+        else settings.set(module.identifier, setting, module.getGuildSettings().get(setting));
         client.updateGuildSettings(info.guild.id, settings);
         const style = getInfoEmbed()
             .setTitle("Changed configuration")
