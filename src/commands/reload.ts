@@ -1,6 +1,5 @@
 import { Message, MessageEmbed } from "discord.js";
 import { WrappedClient } from "../client";
-import { footer, footerurl } from "../config";
 import { StringArgument } from "../objects/commands/arguments/StringArgument";
 import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
@@ -33,7 +32,7 @@ export class Reload extends Command {
                 .setDescription("Succesfully reloaded bot!")
                 .addField("Commands", reloaded.first || "N/A", true)
                 .addField("Events", reloaded.second || "N/A", true)
-                .setFooter(footer, footerurl)
+                .setFooter(client.settings.get("bot", "footer"), client.settings.get("bot", "footer-url"))
                 .setTimestamp()
         );
         embedMessage.delete({ timeout: 5000 });

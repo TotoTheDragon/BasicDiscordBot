@@ -3,7 +3,6 @@ import { IntegerArgument } from "../../../objects/commands/arguments/IntegerArgu
 import { Command } from "../../../objects/commands/Command";
 import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { TextChannel, MessageEmbed } from "discord.js";
-import { footer, footerurl } from "../../../config";
 
 export class Clear extends Command {
     label = "clear";
@@ -33,7 +32,7 @@ export class Clear extends Command {
                     .setColor("#ff0000")
                     .addField("Executor", `<@${info.user.id}>`, true)
                     .setTimestamp()
-                    .setFooter(footer, footerurl)
+                    .setFooter(WrappedClient.instance.settings.get("bot", "footer"), WrappedClient.instance.settings.get("bot", "footer-url"))
             );
         const msg = await info.guildchannel.send(
             new MessageEmbed()
@@ -42,7 +41,7 @@ export class Clear extends Command {
                 .setColor("#ff0000")
                 .addField("Executor", `<@${info.user.id}>`, true)
                 .setTimestamp()
-                .setFooter(footer, footerurl)
+                .setFooter(WrappedClient.instance.settings.get("bot", "footer"), WrappedClient.instance.settings.get("bot", "footer-url"))
         );
         msg.delete({ timeout: 5000 })
     }

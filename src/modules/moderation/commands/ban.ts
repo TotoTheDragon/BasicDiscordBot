@@ -6,7 +6,6 @@ import { WrappedClient } from "../../../client";
 import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { User, GuildMember, Message, MessageEmbed } from "discord.js";
 import { parseTimeFromXtoY } from "../../../util/TimeUtil";
-import { footer, footerurl } from "../../../config";
 
 export class Ban extends Command {
     aliases?: string[];
@@ -48,7 +47,7 @@ export class Ban extends Command {
                 .addField("Time", `${mappedArgs.get("time") ? `${parseTimeFromXtoY(mappedArgs.get("time"), "s", "d")} days` : "Forever"}`, true)
                 .addField("Reason", mappedArgs.get("reason") || "No reason given")
                 .setTimestamp()
-                .setFooter(footer, footerurl)
+                .setFooter(WrappedClient.instance.settings.get("bot", "footer"), WrappedClient.instance.settings.get("bot", "footer-url"))
         );
 
         await targetMember.ban(

@@ -4,7 +4,6 @@ import { StringArgument } from "../../../objects/commands/arguments/StringArgume
 import { WrappedClient } from "../../../client";
 import { CommandInfo } from "../../../objects/commands/CommandInfo";
 import { User, GuildMember, Message, MessageEmbed } from "discord.js";
-import { footer, footerurl } from "../../../config";
 
 export class Kick extends Command {
     label = "kick";
@@ -44,7 +43,7 @@ export class Kick extends Command {
                 .addField("_ _", "_ _", true)
                 .addField("Reason", mappedArgs.get("reason") || "No reason given")
                 .setTimestamp()
-                .setFooter(footer, footerurl)
+                .setFooter(WrappedClient.instance.settings.get("bot", "footer"), WrappedClient.instance.settings.get("bot", "footer-url"))
         );
 
         await targetMember.kick(mappedArgs.get("reason") || "No reason given");
