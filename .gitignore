@@ -13,8 +13,6 @@ dist/
 
 src/modules/empirebot/
 
-src/menus/
-
 src/config.ts
 settings.json
 data.json
