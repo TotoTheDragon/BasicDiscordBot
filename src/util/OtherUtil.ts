@@ -13,3 +13,7 @@ export function getUserLevel(info: CommandInfo): number {
     */
     return 0;
 }
+
+export function escapeRegex(string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
