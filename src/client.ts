@@ -1,6 +1,5 @@
 import { Client, Collection } from "discord.js";
 import { readdir, readFile, stat, writeFile } from "fs/promises";
-import mongoose, { Connection } from "mongoose";
 import { Command } from "./objects/commands/Command";
 import { Event } from "./objects/Event";
 import { GuildWrapper } from "./objects/bot/GuildWrapper";
@@ -16,29 +15,37 @@ export class WrappedClient extends Client {
 
     static instance: WrappedClient = null;
 
+
+    // Module loading
     commands: Collection<string, Command>;
     aliases: Collection<string, Command>;
 
     modules: Collection<string, IModule>;
-    variables: Collection<string, any>;
-
     settings: ModuleSettings;
 
-    wrappedGuilds: Collection<string, GuildWrapper>;
+    // Miscellaneous
+    variables: Collection<string, any>;
 
-    database: Connection;
 
+    // Database stuff
     storageHolder: StorageHolder;
     mysql: SQLWrapper;
 
     constructor(options?) {
         super(options);
+        // Modules
         this.commands = new Collection;
         this.aliases = new Collection;
-        this.wrappedGuilds = new Collection;
         this.modules = new Collection;
-        this.variables = new Collection;
         this.settings = new ModuleSettings();
+
+
+        // Miscellaneous
+        this.variables = new Collection;
+
+        // Database
+        this.storageHolder = new StorageHolder();
+
         WrappedClient.instance = this;
     }
 
@@ -62,7 +69,7 @@ export class WrappedClient extends Client {
         for (let i = 0; i < folders.length; i++) {
             const path = folders[i];
             const files = await findFiles(`${path}`, false);
-            if (files.includes("Module.ts")) {
+            if (files.includes("Module.ts") || files.includes("Modules.js")) {
                 let props = await import(`${path}/Module`);
                 const module: IModule = new props[Object.keys(props)[0]]();
                 this.modules.set(module.identifier, module);
@@ -159,7 +166,6 @@ export class WrappedClient extends Client {
     }
 
     loadDatabase() {
-        this.storageHolder = new StorageHolder();
         this.mysql = new MySQLDatabase({ user: "simpledb", password: "simpledb", database: "simpledb" });
         this.storageHolder.registerStorage(new GuildHolder(this.storageHolder, this.mysql));
     }
