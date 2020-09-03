@@ -1,4 +1,5 @@
 import { ColorResolvable, EmbedFieldData, MessageEmbed } from "discord.js";
+import { escapeRegex } from "../util/OtherUtil";
 
 export class EmbedStyle {
 
@@ -61,6 +62,13 @@ export class EmbedStyle {
         return this;
     }
 
+    parse(placeholder: string, value: string, options?: StyleParseOptions): EmbedStyle {
+        if (this.title && (!options || options.title)) this.title = this.title.replace(new RegExp(escapeRegex(placeholder), "g"), value);
+        if (this.description && (!options || options.description)) this.description = this.description.replace(new RegExp(escapeRegex(placeholder), "g"), value);
+        if (this.footer && (!options || options.footer)) this.footer = this.footer.replace(new RegExp(escapeRegex(placeholder), "g"), value);
+        return this;
+    }
+
     getAsEmbed(): MessageEmbed {
         const embed = new MessageEmbed();
         if (this.title || this.titlePrefix) embed.setTitle(`${this.titlePrefix || ""}${this.title || ""}`);
@@ -73,5 +81,10 @@ export class EmbedStyle {
         if (this.fields.length > 0) embed.addFields(this.fields);
         return embed;
     }
+}
 
+export interface StyleParseOptions {
+    title?: boolean;
+    description?: boolean;
+    footer?: boolean;
 }
