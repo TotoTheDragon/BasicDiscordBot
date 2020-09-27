@@ -7,7 +7,8 @@ export class KeywordArgument implements CommandArgument<string> {
     description: string;
     required: boolean;
 
-    keywords: string[];
+    keywords: Map<string, string>;
+
     matchcase: boolean;
 
     constructor() {
@@ -16,6 +17,7 @@ export class KeywordArgument implements CommandArgument<string> {
         this.description = "A integer";
         this.matchcase = true;
         this.required = true;
+        this.keywords = new Map();
     }
 
     setName = (paramString: string): KeywordArgument => {
@@ -39,8 +41,9 @@ export class KeywordArgument implements CommandArgument<string> {
         return this;
     }
 
-    addKeyword = (paramWord: string): KeywordArgument => {
-        this.keywords.push(paramWord);
+    addKeyword = (paramWord: string, ...aliases: string[]): KeywordArgument => {
+        this.keywords.set(paramWord, paramWord);
+        for (const alias of aliases) this.keywords.set(alias, paramWord);
         return this;
     }
 
@@ -50,10 +53,11 @@ export class KeywordArgument implements CommandArgument<string> {
     }
 
     parse = (paramString: string): string => {
-        return this.keywords.find(s =>
-            this.matchcase ?
-                paramString.startsWith(s) :
-                paramString.toLowerCase().startsWith(s.toLowerCase()))
+        const found = Array.from(this.keywords).find(
+            ([alias]) => this.matchcase ?
+                paramString.startsWith(alias) :
+                paramString.toLowerCase().startsWith(alias.toLowerCase()));
+        return found === undefined ? undefined : found[1];
     };
 
     slice = (paramString: string): string => {

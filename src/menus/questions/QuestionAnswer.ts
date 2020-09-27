@@ -5,9 +5,9 @@ export class QuestionAnswer {
     question: Question;
     answer: any;
 
-    constructor(question: Question, message: string) {
+    constructor(question: Question, answer: string) {
         this.question = question;
-        this.answer = question.parse(message);
+        this.answer = answer;
     }
 
     getAnswer(): any {

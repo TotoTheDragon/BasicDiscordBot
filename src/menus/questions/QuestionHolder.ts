@@ -1,4 +1,4 @@
-import { DMChannel, NewsChannel, TextChannel, Message, MessageCollector, User } from "discord.js";
+import { DMChannel, NewsChannel, TextChannel, Message, MessageCollector, User, Collection } from "discord.js";
 import { Question } from "./Question";
 import { QuestionAnswer } from "./QuestionAnswer";
 
@@ -25,16 +25,30 @@ export class QuestionHolder {
         return this.answers.get(identifier);
     }
 
-    ask(channel: TextChannel | NewsChannel | DMChannel, user: User, index: number): Promise<void> {
+    askQuestion(channel: TextChannel | NewsChannel | DMChannel, user: User, question: Question): Promise<void> {
         return new Promise(async resolve => {
-            const question = this.questions[index];
             const message: Message = await channel.send(question.getMessage());
             const collector: MessageCollector = channel.createMessageCollector((m: Message) => m.author.id === user.id, { max: 1, time: 60000 });
-            collector.once("collect", (m: Message) => {
-                this.answers.set(question.identifier, new QuestionAnswer(question, question.parse(m.content)));
-                resolve();
+            collector.once("end", (msges: Collection<string, Message>) => {
+                const m = msges.first();
+                if (m === undefined) return;
+                const answer = question.args && question.args.length > 0 ? question.parse(m.content, ...question.args) : question.parse(m.content);
+                if (answer === undefined) {
+                    const temp = question;
+                    temp.style.setColor("#ff0000");
+                    temp.style.setTitle(`Try again: ${temp.style.title}`)
+                    resolve(this.askQuestion(channel, user, temp));
+                } else {
+                    this.answers.set(question.identifier, new QuestionAnswer(question, answer));
+                    resolve();
+                }
+
             })
         });
+    }
+
+    ask(channel: TextChannel | NewsChannel | DMChannel, user: User, index: number): Promise<void> {
+        return new Promise(resolve => resolve(this.askQuestion(channel, user, this.questions[index])));
     }
 
     execute(channel: TextChannel | NewsChannel | DMChannel, user: User): Promise<void> {

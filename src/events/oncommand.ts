@@ -1,14 +1,13 @@
 import { Message } from "discord.js";
 import { WrappedClient } from "../client";
+import { ModuleSettings } from "../objects/bot/ModuleSettings";
+import { WrappedMessage } from "../objects/bot/WrappedMessage";
 import { SubCommandArgument } from "../objects/commands/arguments/SubCommandArgument";
 import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
-import { Event } from "../objects/Event";
-import { Settings } from "../objects/bot/Settings";
-import { WrappedMessage } from "../objects/bot/WrappedMessage";
-import { getErrorEmbed, getNoPermissionEmbed } from "../util/EmbedUtil";
 import { EmbedStyle } from "../objects/EmbedStyle";
-import { ModuleSettings } from "../objects/bot/ModuleSettings";
+import { Event } from "../objects/Event";
+import { getErrorEmbed, getNoPermissionEmbed } from "../util/EmbedUtil";
 
 export class CommandHandler implements Event {
     event = "message";
@@ -18,7 +17,7 @@ export class CommandHandler implements Event {
         if (message.author.bot) return;
 
         let wrappedMessage: WrappedMessage = message as WrappedMessage;
-        let guildSettings: ModuleSettings = await client.getGuildSettings(message.guild.id); // Get settings for the guild
+        let guildSettings: ModuleSettings = message.channel.type == "dm" ? await client.getGuildSettings(0) : await client.getGuildSettings(message.guild.id); // Get settings for the guild
 
         wrappedMessage.settings = guildSettings;
         const cmdInfo: CommandInfo = new CommandInfo(wrappedMessage);
@@ -28,17 +27,15 @@ export class CommandHandler implements Event {
         let sliceLength = message.content.startsWith(guildSettings.get("bot", "prefix")) ? guildSettings.get("bot", "prefix").length : client.user.id.length + 4; // Get amount of characters before command
 
         const args: string[] = message.content.slice(sliceLength).trim().split(" ");
-        const command: string = args.shift();
+        const command: string = args.shift().toLowerCase();
         if (client.commands.has(command) || client.aliases.has(command)) {  // Check if command exists
             const cmd = (client.commands.get(command) || client.aliases.get(command));
             const module = client.modules.get(cmd.module);
-            if (!module.isEnabled || !module.isEnabledGuild(cmdInfo.guild.id)) {
+            if (!module.isEnabled || (!cmdInfo.isDM && !module.isEnabledGuild(cmdInfo.guild.id))) {
                 const disabled: EmbedStyle = getErrorEmbed()
                     .setDescription("This module has been disabled");
                 return message.channel.send(disabled.getAsEmbed());
             }
-
-
 
             this.runCommand(client, wrappedMessage, cmd, args);
         }
@@ -47,11 +44,12 @@ export class CommandHandler implements Event {
     async runCommand(client: WrappedClient, message: WrappedMessage, cmd: Command, args: string[], argmap?: Map<string, any>) {
 
 
-
         if (message.info.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and if that is allowed
 
 
-        if (cmd.defaultLevel > 0 && !message.info.member.roles.cache.has(message.settings.get("bot", "admin-role"))) {
+        if (!message.info.member.hasPermission("ADMINISTRATOR") ||
+            (cmd.defaultLevel > 0 && !message.info.member.roles.cache.has(message.settings.get("bot", "admin-role")))
+        ) {
             return (await message.channel.send(
                 getNoPermissionEmbed()
                     .setTitle("Could not execute command")
@@ -93,10 +91,10 @@ export class CommandHandler implements Event {
                 const current = command.arguments[i];
                 const val = current.parse(str.trimStart());
 
-                if (val) str = current.slice(str.trimStart());
+                if (val !== undefined) str = current.slice(str.trimStart());
 
-                if (!(current.required && !current.default && !val)) {
-                    argmap.set(current.identifier, val || current.default);
+                if (!(current.required && !current.default && (val === undefined))) {
+                    argmap.set(current.identifier, val === undefined ? current.default : val);
                     if (current instanceof SubCommandArgument) return [str, argmap];
                 }
             }
@@ -108,5 +106,4 @@ export class CommandHandler implements Event {
         if (command.arguments) command.arguments.forEach(arg => { if (!argmap.has(arg.identifier)) return arg.identifier });
         return undefined;
     }
-
 }

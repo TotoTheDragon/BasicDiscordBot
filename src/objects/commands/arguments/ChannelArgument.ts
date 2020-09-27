@@ -36,17 +36,31 @@ export class ChannelArgument implements CommandArgument<TextChannel | NewsChanne
         return this;
     }
 
-    parse = (paramString: string): TextChannel | NewsChannel | DMChannel => {
+    parse = (paramString: string, guild?: string): TextChannel | NewsChannel | DMChannel => {
         let targetId = this.parseId(paramString);
-        return WrappedClient.instance.channels.cache.find(channel => channel.id === targetId) as TextChannel | NewsChannel | DMChannel;
+        let channel = WrappedClient.instance.channels.cache.find(channel => channel.id === targetId);
+        if (channel === undefined && guild) channel = WrappedClient.instance.guilds.cache.find(g => g.id == guild).channels.cache.find(channel => channel.name.toLowerCase() == paramString.toLowerCase());
+        return channel as TextChannel | NewsChannel | DMChannel;
     };
-
-    slice = (paramString: string): string => {
-        return paramString.split(" ").slice(1).join(" ");
-    }
 
     parseId = (paramString: string): string => {
         let channel = paramString.split(" ")[0];
         return channel.startsWith("<#") ? channel.slice(2, channel.length - 1) : channel;
     };
+
+    parseToId = (paramString: string, guild?: string): string => {
+        const channel = this.parse(paramString, guild);
+        return channel === undefined ? undefined : channel.id;
+    }
+
+    parseToTag = (paramString: string, guild?: string): string => {
+        const id = this.parseToId(paramString, guild);
+        return id === undefined ? undefined : `<#${id}>`;
+    }
+
+
+
+    slice = (paramString: string): string => {
+        return paramString.split(" ").slice(1).join(" ");
+    }
 }

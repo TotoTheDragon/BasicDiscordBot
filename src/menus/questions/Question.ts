@@ -12,13 +12,16 @@ export class Question {
     question: string;
     embed: boolean;
 
-    parse: (answer: string) => any;
+    parse: (answer: string, ...args: any) => any;
+    args: any[];
 
-    constructor(id: number, question: string, parse: (answer: string) => any, style?: EmbedStyle, message?: string) {
+
+    constructor(id: number, question: string, parse: (answer: string) => any, style?: EmbedStyle, message?: string, ...args: any) {
         this.identifier = id;
         this.question = question;
         this.content = message;
         this.parse = parse;
+        this.args = args;
         this.style = style;
         this.embed = style !== undefined;
     }

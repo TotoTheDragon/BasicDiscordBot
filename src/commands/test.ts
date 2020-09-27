@@ -5,6 +5,10 @@ import { Command } from "../objects/commands/Command";
 import { CommandInfo } from "../objects/commands/CommandInfo";
 import { EmbedStyle } from "../objects/EmbedStyle";
 import { getInfoEmbed } from "../util/EmbedUtil";
+import { KeywordArgument } from "../objects/commands/arguments/KeywordArgument";
+import { ChannelArgument } from "../objects/commands/arguments/ChannelArgument";
+import { UserArgument } from "../objects/commands/arguments/UserArgument";
+import { RoleArgument } from "../objects/commands/arguments/RoleArgument";
 
 export class Test extends Command {
     label = "test";
@@ -15,13 +19,41 @@ export class Test extends Command {
 
     run = async (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
 
-        const question1 = new Question(1, "What is 1+1", (string) => string, new EmbedStyle().setColor("#444444").setTitle("Question 1").setDescription("%question%"));
-        const question2 = new Question(2, "What is 2+2", (string) => string, new EmbedStyle().setColor("#444444").setTitle("Question 2").setDescription("%question%"));
-        const question3 = new Question(3, "What is 3+3", (string) => string, new EmbedStyle().setColor("#444444").setTitle("Question 3").setDescription("%question%"));
+        const question1 = new Question(
+            1,
+            "What database would you like to use?",
+            new KeywordArgument().addKeyword("MySQL").addKeyword("SQLite").addKeyword("MongoDB", "mongo").setMatchCase(false).parse,
+            new EmbedStyle().setColor("#444444").setTitle("Question 1").setDescription("%question%\nPossible options: MySQL, SQLite, MongoDB")
+        );
+
+        const question2 = new Question(
+            2,
+            "What channel would you like to have used for logs?",
+            new ChannelArgument().parseToTag,
+            new EmbedStyle().setColor("#444444").setTitle("Question 2").setDescription("%question%\n"),
+            undefined,
+            info.guild.id
+        );
+
+        const question3 = new Question(
+            3,
+            "Who would you like to be an administrator?",
+            new UserArgument().parseToTag,
+            new EmbedStyle().setColor("#444444").setTitle("Question 3").setDescription("%question%\n")
+        );
+
+        const question4 = new Question(
+            4,
+            "What role would you like to have all permissions?",
+            new RoleArgument().parseToTag,
+            new EmbedStyle().setColor("#444444").setTitle("Question 4").setDescription("%question%\n"),
+            undefined,
+            info.guild.id
+        );
 
         const holder = new QuestionHolder();
 
-        holder.addQuestion(question1).addQuestion(question2).addQuestion(question3);
+        holder.addQuestion(question1).addQuestion(question2).addQuestion(question3).addQuestion(question4);
 
         await holder.execute(info.channel, info.user);
 
