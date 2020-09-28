@@ -17,7 +17,7 @@ export class CommandHandler implements Event {
         if (message.author.bot) return;
 
         let wrappedMessage: WrappedMessage = message as WrappedMessage;
-        let guildSettings: ModuleSettings = message.channel.type == "dm" ? await client.getGuildSettings(0) : await client.getGuildSettings(message.guild.id); // Get settings for the guild
+        let guildSettings: ModuleSettings = message.channel.type == "dm" ? await client.getGuildSettings("0") : await client.getGuildSettings(message.guild.id); // Get settings for the guild
 
         wrappedMessage.settings = guildSettings;
         const cmdInfo: CommandInfo = new CommandInfo(wrappedMessage);
@@ -47,8 +47,8 @@ export class CommandHandler implements Event {
         if (message.info.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and if that is allowed
 
 
-        if (!message.info.member.hasPermission("ADMINISTRATOR") ||
-            (cmd.defaultLevel > 0 && !message.info.member.roles.cache.has(message.settings.get("bot", "admin-role")))
+        if (!(message.info.member.hasPermission("ADMINISTRATOR") ||
+            (cmd.defaultLevel > 0 && !message.info.member.roles.cache.has(message.settings.get("bot", "admin-role"))))
         ) {
             return (await message.channel.send(
                 getNoPermissionEmbed()
