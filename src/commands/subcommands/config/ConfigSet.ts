@@ -35,7 +35,7 @@ export class ConfigSet extends Command {
         if (module.configuration.guildParse.has(setting))
             settings.set(module.identifier, setting, module.configuration.guildParse.get(setting)(value));
         else settings.set(module.identifier, setting, value);
-        client.updateGuildSettings(info.guild.id, settings);
+        await client.updateGuildSettings(info.guild.id, settings);
 
         const style = getInfoEmbed()
             .setTitle("Changed configuration")
