@@ -15,11 +15,13 @@ export class GuildHolder extends SqlStorage<GuildWrapper> {
 
     getOrCreate(id: string): Promise<GuildWrapper> {
         return new Promise(async resolve => {
-            if (this.cachedGuilds.has(id)) resolve(this.cachedGuilds.get(id));
+            if (this.cachedGuilds.has(id)) return resolve(this.cachedGuilds.get(id));
             const cache: GuildWrapper = await this.cache(id);
-            if (cache !== undefined) this.cachedGuilds.set(id, cache);
-            else await this.add(this.getDummy(id).loadDefaults());
-            resolve(this.cachedGuilds.get(id));
+            if (cache === undefined)
+                await this.add(this.getDummy(id).loadDefaults());
+            else
+                this.cachedGuilds.set(id, cache);
+            return resolve(this.cachedGuilds.get(id));
         });
     }
 
