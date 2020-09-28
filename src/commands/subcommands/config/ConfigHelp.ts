@@ -11,11 +11,7 @@ export class ConfigHelp extends Command {
     category = "Server Owner";
     defaultLevel = 100;
     allowInDM = false;
-    arguments = [
-        new StringArgument().setIdentifier("module").setRequired(false).setLimit(1),
-        new StringArgument().setIdentifier("setting").setRequired(false).setLimit(1),
-        new StringArgument().setIdentifier("value").setRequired(false).setLimit(1000)
-    ]
+
     run = async (client: WrappedClient, info: CommandInfo, args: string[], mappedArgs: Map<string, any>) => {
 
         const style: EmbedStyle = getInfoEmbed()
