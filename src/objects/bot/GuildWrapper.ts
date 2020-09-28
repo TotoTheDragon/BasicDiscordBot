@@ -9,11 +9,13 @@ export class GuildWrapper implements SqlDataBody {
     id: string
     disabledModules: Set<string>;
     settings: ModuleSettings;
+    data: ModuleSettings;
 
     constructor(paramGuild?: string) {
         this.id = paramGuild;
         this.disabledModules = new Set();
         this.settings = new ModuleSettings();
+        this.data = new ModuleSettings();
     }
 
     loadDefaults(): GuildWrapper {
@@ -40,12 +42,21 @@ export class GuildWrapper implements SqlDataBody {
     }
     serialize = (data: SerializedData): void => {
         data.write("id", this.id);
+        const obj = {};
+        this.data.modules.forEach((v, k) => obj[k] = JSON.stringify(v.toJson()));
+        data.write("data", obj);
         this.settings.modules.forEach((v, k) => data.write(k, JSON.stringify(v.toJson())));
     }
     deserialize = (data: SerializedData): void => {
         this.id = data.applyAs("id");
         this.loadDefaults();
-        for (const mod of Object.keys(data.getAsObject()).filter(v => v !== "id")) {
+        if (data.getAsObject()["data"] !== undefined) {
+            const d = JSON.parse(data.applyAs<string>("data"));
+            for (const k in Object.keys(d)) {
+                this.data.load(k, Array.of(new Map(Object.entries(d[k]))));
+            }
+        }
+        for (const mod of Object.keys(data.getAsObject()).filter(v => !["id", "data"].includes(v))) {
             if (!this.settings.modules.has(mod)) break;
             let map: Map<string, any> = new Map(Object.entries(JSON.parse(data.applyAs<string>(mod))));
             this.settings.modules.get(mod).load(Array.of(map), true);
