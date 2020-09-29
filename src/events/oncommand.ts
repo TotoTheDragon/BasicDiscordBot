@@ -47,9 +47,7 @@ export class CommandHandler implements Event {
         if (message.info.isDM && !cmd.allowInDM) return; // Check if the command is executed in DMs and if that is allowed
 
 
-        if (!(message.info.member.hasPermission("ADMINISTRATOR") ||
-            (cmd.defaultLevel > 0 && !message.info.member.roles.cache.has(message.settings.get("bot", "admin-role"))))
-        ) {
+        if (cmd.defaultLevel > message.info.getPermissionLevel()) {
             return (await message.channel.send(
                 getNoPermissionEmbed()
                     .setTitle("Could not execute command")

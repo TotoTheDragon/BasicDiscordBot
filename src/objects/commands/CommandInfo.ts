@@ -1,4 +1,6 @@
 import { DMChannel, Guild, GuildMember, NewsChannel, TextChannel, User } from "discord.js";
+import { WrappedClient } from "../../client";
+import { getPermissionLevel } from "../../util/PermissionUtil";
 import { WrappedMessage } from "../bot/WrappedMessage";
 
 export class CommandInfo {
@@ -13,6 +15,8 @@ export class CommandInfo {
     member: GuildMember;
     guildchannel: TextChannel | NewsChannel;
     dmchannel: DMChannel;
+
+    permissionLevel: number;
 
     constructor(paramMessage: WrappedMessage) {
         this.message = paramMessage;
@@ -30,6 +34,15 @@ export class CommandInfo {
 
     findChannelById(paramId: string): TextChannel | NewsChannel {
         return this.guild.channels.cache.find(channel => channel.id === paramId) as TextChannel | NewsChannel;
+    }
+
+    findUserById(paramId: string): User {
+        return WrappedClient.instance.users.cache.find(u => u.id === paramId);
+    }
+
+    getPermissionLevel(): number {
+        if (this.permissionLevel === undefined) this.permissionLevel = getPermissionLevel(this);
+        return this.permissionLevel;
     }
 
 }
