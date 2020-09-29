@@ -1,6 +1,6 @@
 import { MessageEmbed } from "discord.js";
 import { EmbedStyle } from "../../objects/EmbedStyle";
-import { escapeRegex } from "../../util/OtherUtil";
+import { escapeRegex } from "../../util/StringUtil";
 
 export class Question {
 

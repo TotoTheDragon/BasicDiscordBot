@@ -1,5 +1,5 @@
 import { ColorResolvable, EmbedFieldData, MessageEmbed } from "discord.js";
-import { escapeRegex } from "../util/OtherUtil";
+import { escapeRegex } from "../util/StringUtil";
 
 export class EmbedStyle {
 
